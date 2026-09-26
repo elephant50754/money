@@ -5,6 +5,10 @@ on:
     - cron: '*/15 13-20 * * 1-5'
   workflow_dispatch:
 
+# 關鍵：開啟 GitHub Repo 的寫入權限，讓 Actions 能自動儲存 last_state.json
+permissions:
+  contents: write
+
 jobs:
   check-and-alert:
     runs-on: ubuntu-latest
@@ -26,3 +30,11 @@ jobs:
           GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
           LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
         run: python monitor.py
+
+      # 將比對狀態檔案提交保存回 Repo
+      - name: Commit & Push state
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add last_state.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: update stock state cache" && git push)
