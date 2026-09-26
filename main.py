@@ -1,17 +1,21 @@
 import os
+import io
 import json
-from datetime import datetime
+import time
+from datetime import datetime, timezone
 import requests
+import pandas as pd
+import yfinance as yf
+import gspread
+from google.oauth2.service_account import Credentials
 
 def send_line_summary(results: list):
     token = os.environ.get("LINE_CHANNEL_ACCESS_TOKEN")
     if not token:
-        print("⚠️ 未偵測到 LINE_CHANNEL_ACCESS_TOKEN，跳過推播。請至 GitHub Secrets 檢查變數名稱！")
+        print("⚠️ 未偵測到 LINE_CHANNEL_ACCESS_TOKEN，跳過推播。")
         return
 
     today_str = datetime.now().strftime("%Y-%m-%d")
-    
-    # 篩選出建議 Sell Put 或 Buy Call 的標的
     sell_puts = [r for r in results if r.get("strategy_tag") == "SELL_PUT"][:5]
     buy_calls = [r for r in results if r.get("strategy_tag") == "BUY_CALL"][:5]
 
@@ -25,23 +29,19 @@ def send_line_summary(results: list):
         lines.append("🔥 【高 IV 賣方策略 (Sell Put 候選)】")
         for s in sell_puts:
             prem = f" (權利金約 ${s['premium']})" if s.get('premium') else ""
-            iv_val = s['iv'] * 100 if s['iv'] < 1.5 else s['iv']
-            lines.append(f"• {s['symbol']} | IV: {round(iv_val, 1)}%{prem}")
+            lines.append(f"• {s['symbol']} | IV: {s['iv']}%{prem}")
         lines.append("")
 
     if buy_calls:
         lines.append("❄️ 【低 IV 買方策略 (Buy Call 候選)】")
         for b in buy_calls:
-            iv_val = b['iv'] * 100 if b['iv'] < 1.5 else b['iv']
-            lines.append(f"• {b['symbol']} | IV: {round(iv_val, 1)}%")
+            lines.append(f"• {b['symbol']} | IV: {b['iv']}%")
         lines.append("")
 
     if not sell_puts and not buy_calls:
         lines.append("⚡ 今日標的大多處於中性震盪區間，無極端偏高/偏低之波動率標的。")
 
-    lines.append("\n✅ Google 試算表已同步更新完成！")
     message_text = "\n".join(lines)
-
     url = "https://api.line.me/v2/bot/message/broadcast"
     headers = {
         "Authorization": f"Bearer {token.strip()}",
@@ -60,17 +60,50 @@ def send_line_summary(results: list):
     except Exception as e:
         print(f"❌ LINE 連線錯誤: {e}")
 
-# 確保在 main 函式最後呼叫它：
+def get_iv_sample(symbol: str):
+    """抓取單一標的 IV 作為範例"""
+    try:
+        t = yf.Ticker(symbol)
+        spot = t.fast_info.get("lastPrice")
+        if not spot or not t.options:
+            return None
+        opt = t.option_chain(t.options[0])
+        calls = opt.calls.dropna(subset=['impliedVolatility'])
+        if calls.empty:
+            return None
+        calls['diff'] = (calls['strike'] - spot).abs()
+        atm = calls.sort_values('diff').iloc[0]
+        iv = round(float(atm['impliedVolatility']) * 100, 1)
+        
+        tag = "SELL_PUT" if iv >= 50 else ("BUY_CALL" if iv <= 25 else "NEUTRAL")
+        return {
+            "symbol": symbol,
+            "spot": spot,
+            "iv": iv,
+            "strategy_tag": tag,
+            "premium": round(spot * 0.03, 2) if tag == "SELL_PUT" else ""
+        }
+    except Exception:
+        return None
+
 def main():
-    # 這裡放你讀取 Google 試算表或抓取 Yahoo 數據的程式碼
-    # ...
-    # 確保產生了 results 清單
-    # ...
+    # 1. 建立監控標的清單並生成 results
+    tickers = ["SPY", "QQQ", "NVDA", "TSLA", "AAPL", "AMD", "MSFT", "INTC"]
+    print(f"開始抓取標的資料，產生 results 清單 (共 {len(tickers)} 檔)...")
     
-    # 呼叫推播
+    results = []
+    for sym in tickers:
+        data = get_iv_sample(sym)
+        if data:
+            results.append(data)
+            print(f"成功取得 {sym} | IV: {data['iv']}%")
+        time.sleep(0.3)
+
+    print(f"數據處理完成，共取得 {len(results)} 筆有效標的。")
+
+    # 2. 呼叫 LINE 推播
     send_line_summary(results)
     print("全部流程執行完畢！")
 
-# 關鍵：這兩行必須在檔案的最底部！
 if __name__ == "__main__":
     main()
