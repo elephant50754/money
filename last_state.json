@@ -1,0 +1,143 @@
+{
+  "__CASH_RATIO__": "15~20 (現金比例)",
+  "NKE": {
+    "name": "Nike Inc",
+    "price": "35.75",
+    "buy": "40.00",
+    "sell": "80.00",
+    "position": "20",
+    "note": "本人沒到150不會賣，山頂見",
+    "action": "",
+    "option": ""
+  },
+  "SOFI": {
+    "name": "SoFi Technologies Inc",
+    "price": "16.58",
+    "buy": "17.00",
+    "sell": "30.00",
+    "position": "8",
+    "note": "(目前生息不利於股價上漲)",
+    "action": "BUY CALL",
+    "option": "SOFI 19/JAN/2029 Call"
+  },
+  "BULL": {
+    "name": "Webull Corp",
+    "price": "7.19",
+    "buy": "5.00",
+    "sell": "15.00",
+    "position": "8",
+    "note": "",
+    "action": "BUY CALL",
+    "option": "BULL 19/JAN/2029  Call"
+  },
+  "KMX": {
+    "name": "Carmax Inc",
+    "price": "57.21",
+    "buy": "45.00",
+    "sell": "",
+    "position": "4",
+    "note": "連鎖二手車商",
+    "action": "",
+    "option": ""
+  },
+  "UPS": {
+    "name": "United Parcel Service Inc",
+    "price": "93.96",
+    "buy": "90.00",
+    "sell": "115.00",
+    "position": "4",
+    "note": "",
+    "action": "",
+    "option": ""
+  },
+  "BX": {
+    "name": "Blackstone Inc",
+    "price": "118.42",
+    "buy": "120.00",
+    "sell": "",
+    "position": "4",
+    "note": "(目前生息不利於股價上漲)",
+    "action": "",
+    "option": ""
+  },
+  "UBER": {
+    "name": "Uber Technologies Inc",
+    "price": "69.62",
+    "buy": "70.00",
+    "sell": "80.00",
+    "position": "3",
+    "note": "",
+    "action": "BUY CALL",
+    "option": "UBER 19/MAR/2027 Call"
+  },
+  "PFE": {
+    "name": "Pfizer Inc",
+    "price": "28.67",
+    "buy": "25.00",
+    "sell": "",
+    "position": "3",
+    "note": "威爾鋼大佬",
+    "action": "",
+    "option": ""
+  },
+  "BA": {
+    "name": "Boeing Co",
+    "price": "198.07",
+    "buy": "200.00",
+    "sell": "",
+    "position": "2",
+    "note": "投資邏輯跟INTC一樣，美國不會讓自家沒有引擎，但不會像INTC那樣暴漲，做波段",
+    "action": "",
+    "option": ""
+  },
+  "RC": {
+    "name": "Ready Capital Corp",
+    "price": "1.33",
+    "buy": "2.00",
+    "sell": "",
+    "position": "2",
+    "note": "(目前生息不利於股價上漲)(房地產)(超高風險)(賭一把)",
+    "action": "",
+    "option": ""
+  },
+  "NFLX": {
+    "name": "Netflix Inc",
+    "price": "71.15",
+    "buy": "70.00",
+    "sell": "",
+    "position": "1",
+    "note": "",
+    "action": "",
+    "option": ""
+  },
+  "SFM": {
+    "name": "Sprouts Farmers Market Inc",
+    "price": "62.49",
+    "buy": "65.00",
+    "sell": "90.00",
+    "position": "1",
+    "note": "(高級連鎖生鮮超市)(Michael Burry看多倉位之一)",
+    "action": "",
+    "option": ""
+  },
+  "WMT": {
+    "name": "Walmart Inc",
+    "price": "107.98",
+    "buy": "100.00",
+    "sell": "",
+    "position": "0.5",
+    "note": "沃爾瑪",
+    "action": "",
+    "option": ""
+  },
+  "MCD": {
+    "name": "McDonald's Corp",
+    "price": "236.50",
+    "buy": "220.00",
+    "sell": "",
+    "position": "",
+    "note": "跌破220先別急著買，到時候在分析",
+    "action": "",
+    "option": ""
+  }
+}
