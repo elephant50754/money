@@ -2,9 +2,8 @@ name: Stock Price Monitor
 
 on:
   schedule:
-    # 範例：週一至週五 美東盤中時間執行（UTC 13:30 ~ 20:00，可依需求調整 Cron）
     - cron: '*/15 13-20 * * 1-5'
-  workflow_dispatch: # 支援手動按按鈕觸發
+  workflow_dispatch:
 
 jobs:
   check-and-alert:
@@ -23,7 +22,7 @@ jobs:
 
       - name: Run Monitor Script
         env:
+          GOOGLE_CREDS_JSON: ${{ secrets.GOOGLE_CREDS_JSON }}
+          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
           LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
-          LINE_USER_ID: ${{ secrets.LINE_USER_ID }}
-          SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
         run: python monitor.py
