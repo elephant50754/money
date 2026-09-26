@@ -48,3 +48,10 @@ def send_line_summary(results: list):
             print(f"❌ LINE 發送失敗: {resp.text}")
     except Exception as e:
         print(f"❌ LINE 連線錯誤: {e}")
+
+def main():
+    # ... 原有的計算與 update_google_sheets 流程 ...
+
+    # 確保在程式結束前呼叫 LINE 推播：
+    send_line_summary(results)
+    print("全部流程執行完畢！")
