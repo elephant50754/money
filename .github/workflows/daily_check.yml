@@ -2,9 +2,8 @@ name: Daily Stock Target Alert
 
 on:
   schedule:
-    # 台灣時間每週二至週六清晨 05:30 (美股收盤後) 定時執行
     - cron: '30 21 * * 1-5'
-  workflow_dispatch: # 支援在 GitHub 網頁上手動一鍵按「Run workflow」
+  workflow_dispatch:
 
 jobs:
   check-and-alert:
@@ -19,12 +18,14 @@ jobs:
           python-version: '3.11'
           cache: 'pip'
 
-      - name: 安裝套件
-        run: pip install -r requirements.txt
+      - name: 安裝相依套件
+        run: |
+          pip install yfinance pandas requests gspread google-auth
 
-     - name: 執行點位比對並推播 LINE
+      - name: 執行點位比對並推播 LINE
         env:
           GOOGLE_CREDS_JSON: ${{ secrets.GOOGLE_CREDS_JSON }}
           GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
           LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
-        run: python main.py
+        run: |
+          python main.py
