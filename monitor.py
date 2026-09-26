@@ -30,6 +30,12 @@ def send_line_broadcast(text):
     logger.info(f"LINE API 回應代碼: HTTP {resp.status_code}")
     logger.info(f"LINE API 回應內容: {resp.text}")
 
+def get_col(row, idx):
+    """安全取得欄位字串，若該儲存格空白或不存在則回傳空字串"""
+    if idx < len(row):
+        return row[idx].strip()
+    return ""
+
 def check_stock():
     # 1. 憑證與連線
     creds_info = json.loads(CREDS_JSON_STR)
@@ -38,62 +44,81 @@ def check_stock():
     gc = gspread.authorize(credentials)
     sheet = gc.open_by_key(SHEET_ID).sheet1
 
-    # 2. 直接取得試算表所有二維陣列（避免第2列現金比例干擾）
     all_rows = sheet.get_all_values()
     logger.info(f"試算表總列數: {len(all_rows)}")
 
+    # 取得第 2 列的現金比例（截圖中 F2 為 15~20，G2 為 現金比例）
+    cash_ratio = ""
+    if len(all_rows) >= 2:
+        val_f2 = get_col(all_rows[1], 5)
+        val_g2 = get_col(all_rows[1], 6)
+        if val_f2 or val_g2:
+            cash_ratio = f"💰 目標現金比例：{val_f2} ({val_g2})"
+
     alerts = []
-    checked_stocks = []
+    checked_count = 0
 
-    # 截圖中股票資料從第 3 列開始（Python index 為 2）
-    for row_idx, row in enumerate(all_rows[2:], start=3):
-        # 避免空白列或欄位數不足
-        if len(row) < 5:
-            continue
+    # 股票資料從第 3 列（Python index 2）開始
+    for row in all_rows[2:]:
+        ticker = get_col(row, 0)
+        price_str = get_col(row, 1).replace("$", "").replace(",", "")
+        name = get_col(row, 2)
+        buy_str = get_col(row, 3).replace("$", "").replace(",", "")
+        sell_str = get_col(row, 4).replace("$", "").replace(",", "")
+        position = get_col(row, 5)
+        note = get_col(row, 6)
+        action = get_col(row, 7)
+        option_exp = get_col(row, 8)
 
-        # A:代碼(0), B:現價(1), C:名稱(2), D:買點(3), E:賣點(4)
-        ticker = row[0].strip()
-        price_str = row[1].strip().replace("$", "").replace(",", "")
-        buy_str = row[3].strip().replace("$", "").replace(",", "")
-        sell_str = row[4].strip().replace("$", "").replace(",", "")
-
-        # 如果股票代碼為空，略過
         if not ticker:
             continue
 
+        checked_count += 1
+
         try:
             price = float(price_str)
-            checked_stocks.append(f"{ticker}({price})")
+            buy_val = float(buy_str) if buy_str else None
+            sell_val = float(sell_str) if sell_str else None
 
-            buy_val = float(buy_str) if buy_str != "" else None
-            sell_val = float(sell_str) if sell_str != "" else None
-
+            signal_type = None
             if buy_val is not None and price <= buy_val:
-                msg = f"🟢 【買入訊號】{ticker} 現價: {price}，已達買點: {buy_val}"
-                logger.info(f"🎯 觸發買入: {msg}")
-                alerts.append(msg)
+                signal_type = f"🟢 【買入訊號】達買點: {buy_val}"
+            elif sell_val is not None and price >= sell_val:
+                signal_type = f"🔴 【賣出訊號】達賣點: {sell_val}"
 
-            if sell_val is not None and price >= sell_val:
-                msg = f"🔴 【賣出訊號】{ticker} 現價: {price}，已達賣點: {sell_val}"
-                logger.info(f"🎯 觸發賣出: {msg}")
-                alerts.append(msg)
+            if signal_type:
+                # 組合 9 個欄位的完整股票資訊區塊
+                card = [
+                    f"{signal_type}",
+                    f"📌 代碼: {ticker} ({name or '未填'})",
+                    f"💲 現價: {price}",
+                    f"🎯 買點: {buy_str or '無'} | 賣點: {sell_str or '無'}",
+                    f"📊 倉位佔比: {position}%" if position else "📊 倉位佔比: 無",
+                    f"⚡ 建議動作: {action or '無'}",
+                    f"⏳ 期權時間: {option_exp or '無'}",
+                    f"📝 筆記: {note or '無'}",
+                    "─────────────────"
+                ]
+                alerts.append("\n".join(card))
 
         except ValueError:
-            # 略過無法轉為浮點數的列（例如公式報錯或註記文字）
             continue
 
-    logger.info(f"成功讀取的股票清單: {', '.join(checked_stocks)}")
+    logger.info(f"檢查完成：共比對 {checked_count} 檔，觸發 {len(alerts)} 筆警示。")
 
-    # 3. 發送邏輯
+    # 組合最終推播訊息
     if alerts:
-        message = "📊 美股監控通知：\n" + "\n".join(alerts)
-        send_line_broadcast(message)
+        header_parts = ["🔔【美股即時更新推播】"]
+        if cash_ratio:
+            header_parts.append(cash_ratio)
+        header_parts.append("─────────────────")
+
+        header = "\n".join(header_parts) + "\n"
+        full_message = header + "\n".join(alerts)
+
+        send_line_broadcast(full_message)
     else:
-        logger.info("ℹ️ 現價未觸發任何條件。")
-        # 💡 除錯測試用：若沒觸發，仍強制發一則狀態回報確認 LINE 暢通
-        # 確認收到後，可以把下面兩行註解掉
-        test_message = f"🤖 系統連線測試正常！\n已檢查 {len(checked_stocks)} 檔股票，目前未達買賣點位。"
-        send_line_broadcast(test_message)
+        logger.info("ℹ️ 未達提醒條件，無需推播。")
 
 if __name__ == "__main__":
     check_stock()
