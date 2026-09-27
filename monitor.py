@@ -160,7 +160,7 @@ def check_stock():
                 f"⚡ 建議動作: {action or '無'}",
                 f"⏳ 期權時間: {option_exp or '無'}",
                 f"📝 筆記: {note or '無'}",
-                "─────────────────"
+                "──────────────"
             ]
             alerts.append("\n".join(card))
 
