@@ -167,7 +167,7 @@ def callback():
                     f"💲 現價: {get_col(matched, 1)}\n"
                     f"🎯 買點: {get_col(matched, 4) or '無'} | 賣點: {get_col(matched, 5) or '無'}\n"
                     f"📊 倉位佔比: {get_col(matched, 6)}%\n"
-                    f"⚡ 建議動作: {get_col(matched, 8) or '無'}\n"
+                    f"⚡ BUY/SELL: {get_col(matched, 8) or '無'}\n"
                     f"⏳ 期權時間: {get_col(matched, 9) or '無'}\n"
                     f"📝 筆記: {get_col(matched, 7) or '無'}"
                 )
