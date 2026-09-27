@@ -66,7 +66,6 @@ def callback():
 
         try:
             rows = get_all_sheet_rows()
-            # 略過前 2 列（標題與現金比例），從第 3 列股票資料開始
             stock_rows = rows[2:] if len(rows) >= 3 else []
         except Exception as e:
             logger.error(f"Google Sheets 讀取失敗: {e}")
@@ -76,7 +75,7 @@ def callback():
         reply_text = ""
 
         # ==========================================
-        # 1. 處理圖文選單「買點」按鈕
+        # 1. 處理圖文選單「買點」按鈕 (E欄為買點)
         # ==========================================
         if user_msg == "買點":
             results = []
@@ -84,12 +83,13 @@ def callback():
                 ticker = get_col(row, 0)
                 price = get_col(row, 1)
                 name = get_col(row, 2)
-                buy_target = get_col(row, 3)
+                position_type = get_col(row, 3)  # 新增：D 欄倉位
+                buy_target = get_col(row, 4)     # 順延至 E 欄
 
-                # 買點欄位有資料就顯示
                 if ticker and buy_target:
+                    type_str = f" [{position_type}]" if position_type else ""
                     results.append(
-                        f"🟢 【{ticker}】{name}\n"
+                        f"🟢 【{ticker}】{name}{type_str}\n"
                         f"   現價: {price} | 買點: {buy_target}"
                     )
 
@@ -99,7 +99,7 @@ def callback():
                 reply_text = "目前試算表中沒有任何股票設定買點。"
 
         # ==========================================
-        # 2. 處理圖文選單「賣點」按鈕
+        # 2. 處理圖文選單「賣點」按鈕 (F欄為賣點)
         # ==========================================
         elif user_msg == "賣點":
             results = []
@@ -107,12 +107,13 @@ def callback():
                 ticker = get_col(row, 0)
                 price = get_col(row, 1)
                 name = get_col(row, 2)
-                sell_target = get_col(row, 4)
+                position_type = get_col(row, 3)  # 新增：D 欄倉位
+                sell_target = get_col(row, 5)    # 順延至 F 欄
 
-                # 賣點欄位有資料就顯示
                 if ticker and sell_target:
+                    type_str = f" [{position_type}]" if position_type else ""
                     results.append(
-                        f"🔴 【{ticker}】{name}\n"
+                        f"🔴 【{ticker}】{name}{type_str}\n"
                         f"   現價: {price} | 賣點: {sell_target}"
                     )
 
@@ -122,7 +123,7 @@ def callback():
                 reply_text = "目前試算表中沒有任何股票設定賣點。"
 
         # ==========================================
-        # 3. 處理圖文選單「選擇權」按鈕
+        # 3. 處理圖文選單「選擇權」按鈕 (J欄為期權時間)
         # ==========================================
         elif user_msg == "選擇權":
             results = []
@@ -130,14 +131,15 @@ def callback():
                 ticker = get_col(row, 0)
                 price = get_col(row, 1)
                 name = get_col(row, 2)
-                action = get_col(row, 7)
-                option_exp = get_col(row, 8)
+                position_type = get_col(row, 3)  # 新增：D 欄倉位
+                action = get_col(row, 8)         # 順延至 I 欄
+                option_exp = get_col(row, 9)     # 順延至 J 欄
 
-                # 期權時間欄位有資料就顯示
                 if ticker and option_exp:
                     action_display = f" | 動作: {action}" if action else ""
+                    type_str = f" [{position_type}]" if position_type else ""
                     results.append(
-                        f"⏳ 【{ticker}】{name}\n"
+                        f"⏳ 【{ticker}】{name}{type_str}\n"
                         f"   現價: {price}{action_display}\n"
                         f"   期權內容: {option_exp}"
                     )
@@ -148,7 +150,7 @@ def callback():
                 reply_text = "目前試算表中沒有任何股票設定期權時間。"
 
         # ==========================================
-        # 4. 輸入特定股票代碼（如 NKE、SOFI）顯示全部欄位
+        # 4. 輸入特定股票代碼（如 NKE、SOFI、MCD）
         # ==========================================
         else:
             ticker_query = user_msg.upper()
@@ -161,17 +163,18 @@ def callback():
             if matched:
                 reply_text = (
                     f"📊 【{get_col(matched, 0)}】{get_col(matched, 2)}\n"
+                    f"🏷️ 倉位狀態: {get_col(matched, 3) or '無'}\n"
                     f"💲 現價: {get_col(matched, 1)}\n"
-                    f"🎯 買點: {get_col(matched, 3) or '無'} | 賣點: {get_col(matched, 4) or '無'}\n"
-                    f"📊 倉位佔比: {get_col(matched, 5)}%\n"
-                    f"⚡ 建議動作: {get_col(matched, 7) or '無'}\n"
-                    f"⏳ 期權時間: {get_col(matched, 8) or '無'}\n"
-                    f"📝 筆記: {get_col(matched, 6) or '無'}"
+                    f"🎯 買點: {get_col(matched, 4) or '無'} | 賣點: {get_col(matched, 5) or '無'}\n"
+                    f"📊 倉位佔比: {get_col(matched, 6)}%\n"
+                    f"⚡ 建議動作: {get_col(matched, 8) or '無'}\n"
+                    f"⏳ 期權時間: {get_col(matched, 9) or '無'}\n"
+                    f"📝 筆記: {get_col(matched, 7) or '無'}"
                 )
             else:
                 reply_text = (
                     f"查無指令或股票代碼【{user_msg}】。\n\n"
-                    f"💡 你可以直接點擊下方選單「買點」、「賣點」、「選擇權」，或直接輸入股票代碼（如 SOFI、NKE）。"
+                    f"💡 你可以直接點擊下方選單「買點」、「賣點」、「選擇權」，或直接輸入股票代碼（如 SOFI、MCD）。"
                 )
 
         reply_line(reply_token, reply_text)
