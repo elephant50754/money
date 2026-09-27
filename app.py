@@ -75,7 +75,7 @@ def callback():
         reply_text = ""
 
         # ==========================================
-        # 1. 處理圖文選單「買點」按鈕 (E欄為買點)
+        # 1. 處理圖文選單「買點」按鈕 (E欄為買點，包含倉位佔比、期權時間、筆記)
         # ==========================================
         if user_msg == "買點":
             results = []
@@ -83,23 +83,34 @@ def callback():
                 ticker = get_col(row, 0)
                 price = get_col(row, 1)
                 name = get_col(row, 2)
-                position_type = get_col(row, 3)  # 新增：D 欄倉位
-                buy_target = get_col(row, 4)     # 順延至 E 欄
+                position_status = get_col(row, 3) # D: 倉位狀態
+                buy_target = get_col(row, 4)      # E: 買入點位
+                sell_target = get_col(row, 5)     # F: 賣出點位
+                position_pct = get_col(row, 6)    # G: 倉位佔比%
+                note = get_col(row, 7)            # H: 筆記
+                action = get_col(row, 8)          # I: (BUY/SELL)
+                option_exp = get_col(row, 9)      # J: 期權時間
 
                 if ticker and buy_target:
-                    type_str = f" [{position_type}]" if position_type else ""
-                    results.append(
-                        f"🟢 【{ticker}】{name}{type_str}\n"
-                        f"   現價: {price} | 買點: {buy_target}"
-                    )
+                    pos_pct_display = f"{position_pct}%" if position_pct else "無"
+                    card = [
+                        f"🟢 【{ticker}】{name} [{position_status or '未分類'}]",
+                        f"💲 現價: {price}",
+                        f"🎯 買點: {buy_target} | 賣點: {sell_target or '無'}",
+                        f"📊 倉位佔比: {pos_pct_display}",
+                        f"⚡ 動作: {action or '無'}",
+                        f"⏳ 期權時間: {option_exp or '無'}",
+                        f"📝 筆記: {note or '無'}"
+                    ]
+                    results.append("\n".join(card))
 
             if results:
-                reply_text = f"🎯【有設定買點之清單】(共 {len(results)} 檔)：\n\n" + "\n\n".join(results)
+                reply_text = f"🎯【有設定買點之清單】(共 {len(results)} 檔)：\n\n" + "\n\n─────────────────\n\n".join(results)
             else:
                 reply_text = "目前試算表中沒有任何股票設定買點。"
 
         # ==========================================
-        # 2. 處理圖文選單「賣點」按鈕 (F欄為賣點)
+        # 2. 處理圖文選單「賣點」按鈕 (F欄為賣點，包含倉位佔比、期權時間、筆記)
         # ==========================================
         elif user_msg == "賣點":
             results = []
@@ -107,23 +118,34 @@ def callback():
                 ticker = get_col(row, 0)
                 price = get_col(row, 1)
                 name = get_col(row, 2)
-                position_type = get_col(row, 3)  # 新增：D 欄倉位
-                sell_target = get_col(row, 5)    # 順延至 F 欄
+                position_status = get_col(row, 3) # D: 倉位狀態
+                buy_target = get_col(row, 4)      # E: 買入點位
+                sell_target = get_col(row, 5)     # F: 賣出點位
+                position_pct = get_col(row, 6)    # G: 倉位佔比%
+                note = get_col(row, 7)            # H: 筆記
+                action = get_col(row, 8)          # I: (BUY/SELL)
+                option_exp = get_col(row, 9)      # J: 期權時間
 
                 if ticker and sell_target:
-                    type_str = f" [{position_type}]" if position_type else ""
-                    results.append(
-                        f"🔴 【{ticker}】{name}{type_str}\n"
-                        f"   現價: {price} | 賣點: {sell_target}"
-                    )
+                    pos_pct_display = f"{position_pct}%" if position_pct else "無"
+                    card = [
+                        f"🔴 【{ticker}】{name} [{position_status or '未分類'}]",
+                        f"💲 現價: {price}",
+                        f"🎯 買點: {buy_target or '無'} | 賣點: {sell_target}",
+                        f"📊 倉位佔比: {pos_pct_display}",
+                        f"⚡ 動作: {action or '無'}",
+                        f"⏳ 期權時間: {option_exp or '無'}",
+                        f"📝 筆記: {note or '無'}"
+                    ]
+                    results.append("\n".join(card))
 
             if results:
-                reply_text = f"🎯【有設定賣點之清單】(共 {len(results)} 檔)：\n\n" + "\n\n".join(results)
+                reply_text = f"🎯【有設定賣點之清單】(共 {len(results)} 檔)：\n\n" + "\n\n─────────────────\n\n".join(results)
             else:
                 reply_text = "目前試算表中沒有任何股票設定賣點。"
 
         # ==========================================
-        # 3. 處理圖文選單「選擇權」按鈕 (J欄為期權時間)
+        # 3. 處理圖文選單「選擇權」按鈕 (J欄為期權時間，包含全部對齊欄位)
         # ==========================================
         elif user_msg == "選擇權":
             results = []
@@ -131,21 +153,27 @@ def callback():
                 ticker = get_col(row, 0)
                 price = get_col(row, 1)
                 name = get_col(row, 2)
-                position_type = get_col(row, 3)  # 新增：D 欄倉位
-                action = get_col(row, 8)         # 順延至 I 欄
-                option_exp = get_col(row, 9)     # 順延至 J 欄
+                position_status = get_col(row, 3) # D: 倉位狀態
+                buy_target = get_col(row, 4)      # E: 買入點位
+                sell_target = get_col(row, 5)     # F: 賣出點位
+                position_pct = get_col(row, 6)    # G: 倉位佔比%
+                note = get_col(row, 7)            # H: 筆記
+                action = get_col(row, 8)          # I: (BUY/SELL)
+                option_exp = get_col(row, 9)      # J: 期權時間
 
                 if ticker and option_exp:
-                    action_display = f" | 動作: {action}" if action else ""
-                    type_str = f" [{position_type}]" if position_type else ""
-                    results.append(
-                        f"⏳ 【{ticker}】{name}{type_str}\n"
-                        f"   現價: {price}{action_display}\n"
-                        f"   期權內容: {option_exp}"
-                    )
+                    pos_pct_display = f"{position_pct}%" if position_pct else "無"
+                    card = [
+                        f"⏳ 【{ticker}】{name} [{position_status or '未分類'}]",
+                        f"💲 現價: {price}",
+                        f"⚡ 動作: {action or '無'}",
+                        f"⏳ 期權內容: {option_exp}",
+                        f"📝 筆記: {note or '無'}"
+                    ]
+                    results.append("\n".join(card))
 
             if results:
-                reply_text = f"📊【期權清單】(共 {len(results)} 檔)：\n\n" + "\n\n".join(results)
+                reply_text = f"📊【期權清單】(共 {len(results)} 檔)：\n\n" + "\n\n─────────────────\n\n".join(results)
             else:
                 reply_text = "目前試算表中沒有任何股票設定期權時間。"
 
@@ -161,13 +189,15 @@ def callback():
                     break
 
             if matched:
+                pos_pct_val = get_col(matched, 6)
+                pos_pct_str = f"{pos_pct_val}%" if pos_pct_val else "無"
                 reply_text = (
                     f"📊 【{get_col(matched, 0)}】{get_col(matched, 2)}\n"
                     f"🏷️ 倉位狀態: {get_col(matched, 3) or '無'}\n"
                     f"💲 現價: {get_col(matched, 1)}\n"
                     f"🎯 買點: {get_col(matched, 4) or '無'} | 賣點: {get_col(matched, 5) or '無'}\n"
-                    f"📊 倉位佔比: {get_col(matched, 6)}%\n"
-                    f"⚡ BUY/SELL: {get_col(matched, 8) or '無'}\n"
+                    f"📊 倉位佔比: {pos_pct_str}\n"
+                    f"⚡ 動作: {get_col(matched, 8) or '無'}\n"
                     f"⏳ 期權時間: {get_col(matched, 9) or '無'}\n"
                     f"📝 筆記: {get_col(matched, 7) or '無'}"
                 )
