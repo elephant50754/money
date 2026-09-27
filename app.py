@@ -75,7 +75,7 @@ def callback():
         reply_text = ""
 
         # ==========================================
-        # 1. 處理圖文選單「買點」按鈕 (E欄為買點，包含倉位佔比、期權時間、筆記)
+        # 1. 處理圖文選單「買點」按鈕 (E欄為買點)
         # ==========================================
         if user_msg == "買點":
             results = []
@@ -110,7 +110,7 @@ def callback():
                 reply_text = "目前試算表中沒有任何股票設定買點。"
 
         # ==========================================
-        # 2. 處理圖文選單「賣點」按鈕 (F欄為賣點，包含倉位佔比、期權時間、筆記)
+        # 2. 處理圖文選單「賣點」按鈕 (F欄為賣點)
         # ==========================================
         elif user_msg == "賣點":
             results = []
@@ -145,25 +145,26 @@ def callback():
                 reply_text = "目前試算表中沒有任何股票設定賣點。"
 
         # ==========================================
-        # 3. 處理圖文選單「選擇權」按鈕 (J欄為期權時間，包含全部對齊欄位)
+        # 3. 處理圖文選單「選擇權」按鈕 (修正欄位對齊：新增動作、改為期權時間)
         # ==========================================
         elif user_msg == "選擇權":
             results = []
             for row in stock_rows:
-                ticker = get_col(row, 0)
-                price = get_col(row, 1)
-                name = get_col(row, 2)
+                ticker = get_col(row, 0)          # A: 股票代碼
+                price = get_col(row, 1)           # B: 現價
+                name = get_col(row, 2)            # C: 公司名稱
                 note = get_col(row, 7)            # H: 筆記
-                action = get_col(row, 8)          # I: (BUY/SELL)
+                action = get_col(row, 8)          # I: BUY/SELL (動作)
                 option_exp = get_col(row, 9)      # J: 期權時間
 
+                # J 欄（期權時間）有填寫就顯示出來
                 if ticker and option_exp:
                     pos_pct_display = f"{position_pct}%" if position_pct else "無"
                     card = [
                         f"⏳ 【{ticker}】{name} [{position_status or '未分類'}]",
                         f"💲 現價: {price}",
                         f"⚡ 動作: {action or '無'}",
-                        f"⏳ 期權內容: {option_exp}",
+                        f"⏳ 期權時間: {option_exp}",
                         f"📝 筆記: {note or '無'}"
                     ]
                     results.append("\n".join(card))
