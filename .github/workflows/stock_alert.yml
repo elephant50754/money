@@ -2,7 +2,8 @@ name: Stock Price Monitor
 
 on:
   schedule:
-    - cron: '*/15 13-20 * * 1-5'
+    # 台灣時間 24 小時，每 15 分鐘執行一次
+    - cron: '*/15 * * * *'
   workflow_dispatch:
 
 # 關鍵：開啟 GitHub Repo 的寫入權限，讓 Actions 能自動儲存 last_state.json
