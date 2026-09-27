@@ -61,7 +61,7 @@ def check_stock():
     previous_state = load_previous_state()
     current_state = {}
 
-    # 取得現金比例（欄位順延至 G2 與 H2，即 Index 6 與 7）
+    # 取得現金比例（G2 與 H2）
     val_g2 = get_col(all_rows[1], 6) if len(all_rows) >= 2 else ""
     val_h2 = get_col(all_rows[1], 7) if len(all_rows) >= 2 else ""
     current_cash = f"{val_g2} ({val_h2})".strip()
@@ -74,10 +74,9 @@ def check_stock():
     if prev_cash and current_cash != prev_cash:
         alerts.append(f"🔄 【目標現金比例變更】\n舊值: {prev_cash} ➔ 新值: {current_cash}\n─────────────────")
 
-    # 欄位名稱對照表（用於標註哪一欄被修改，加入「倉位」）
+    # 手動更新比對清單：已完全移除「現價」，避免股價跳動干擾通知
     field_names = {
         "status": "倉位狀態",
-        "price": "現價",
         "buy": "買點",
         "sell": "賣點",
         "position": "倉位佔比",
@@ -94,18 +93,17 @@ def check_stock():
 
         price_str = get_col(row, 1).replace("$", "").replace(",", "")
         name = get_col(row, 2)
-        pos_status = get_col(row, 3)  # 新增：D 欄倉位（正式倉 / 觀察倉）
-        buy_str = get_col(row, 4).replace("$", "").replace(",", "")     # 順延至 E 欄
-        sell_str = get_col(row, 5).replace("$", "").replace(",", "")    # 順延至 F 欄
-        position = get_col(row, 6)                                      # 順延至 G 欄
-        note = get_col(row, 7)                                          # 順延至 H 欄
-        action = get_col(row, 8)                                        # 順延至 I 欄
-        option_exp = get_col(row, 9)                                    # 順延至 J 欄
+        pos_status = get_col(row, 3)                                    # D 欄倉位
+        buy_str = get_col(row, 4).replace("$", "").replace(",", "")     # E 欄買點
+        sell_str = get_col(row, 5).replace("$", "").replace(",", "")    # F 欄賣點
+        position = get_col(row, 6)                                      # G 欄倉位%
+        note = get_col(row, 7)                                          # H 欄筆記
+        action = get_col(row, 8)                                        # I 欄動作
+        option_exp = get_col(row, 9)                                    # J 欄期權時間
 
         current_data = {
             "name": name,
             "status": pos_status,
-            "price": price_str,
             "buy": buy_str,
             "sell": sell_str,
             "position": position,
@@ -115,7 +113,7 @@ def check_stock():
         }
         current_state[ticker] = current_data
 
-        # 1. 判斷是否有資料更動
+        # 1. 判斷是否有手動欄位更動（不含現價）
         change_logs = []
         if ticker in previous_state:
             prev_data = previous_state[ticker]
@@ -125,10 +123,10 @@ def check_stock():
                 if old_val != new_val:
                     change_logs.append(f"• {label}: {old_val or '無'} ➔ {new_val or '無'}")
         else:
-            if previous_state:  # 若非系統首次初次化執行，代表是新加入的股票
+            if previous_state:  # 新增股票代碼
                 change_logs.append("• 新增股票代碼至試算表")
 
-        # 2. 判斷是否達到買賣點位
+        # 2. 判斷現價是否達到買賣點位
         signal_type = None
         try:
             price = float(price_str)
@@ -142,7 +140,7 @@ def check_stock():
         except ValueError:
             pass
 
-        # 3. 滿足「有欄位修改」或「達到訊號」，即打包卡片推播
+        # 3. 滿足條件時打包訊息
         if change_logs or signal_type:
             status_tags = []
             if signal_type:
@@ -160,11 +158,11 @@ def check_stock():
                 f"⚡ 建議動作: {action or '無'}",
                 f"⏳ 期權時間: {option_exp or '無'}",
                 f"📝 筆記: {note or '無'}",
-                "──────────────"
+                "─────────────────"
             ]
             alerts.append("\n".join(card))
 
-    # 儲存最新狀態供下次比對
+    # 儲存最新狀態
     save_current_state(current_state)
 
     # 4. 發送通知
@@ -173,7 +171,7 @@ def check_stock():
         full_message = header + "\n".join(alerts)
         send_line_broadcast(full_message)
     else:
-        logger.info("ℹ️ 無任何資料更新或達到買賣點位，不推播。")
+        logger.info("ℹ️ 無手動修改資料或達到買賣點位，不推播。")
 
 if __name__ == "__main__":
     check_stock()
