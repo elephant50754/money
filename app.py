@@ -145,7 +145,7 @@ def callback():
                 reply_text = "目前試算表中沒有任何股票設定賣點。"
 
         # ==========================================
-        # 3. 處理圖文選單「選擇權」按鈕 (修正欄位對齊：新增動作、改為期權時間)
+        # 3. 處理圖文選單「選擇權」按鈕 (包含動作與期權時間)
         # ==========================================
         elif user_msg == "選擇權":
             results = []
@@ -157,14 +157,14 @@ def callback():
                 action = get_col(row, 8)          # I: BUY/SELL (動作)
                 option_exp = get_col(row, 9)      # J: 期權時間
 
-                # J 欄（期權時間）有填寫就顯示出來
-                if ticker and option_exp:
+                # 只要期權時間 (J欄) 或動作 (I欄) 有資料就列出
+                if ticker and (option_exp or action):
                     pos_pct_display = f"{position_pct}%" if position_pct else "無"
                     card = [
                         f"⏳ 【{ticker}】{name} [{position_status or '未分類'}]",
                         f"💲 現價: {price}",
                         f"⚡ 動作: {action or '無'}",
-                        f"⏳ 期權時間: {option_exp}",
+                        f"⏳ 期權時間: {option_exp or '無'}",
                         f"📝 筆記: {note or '無'}"
                     ]
                     results.append("\n".join(card))
@@ -172,7 +172,7 @@ def callback():
             if results:
                 reply_text = f"📊【期權清單】(共 {len(results)} 檔)：\n\n" + "\n\n─────────────────\n\n".join(results)
             else:
-                reply_text = "目前試算表中沒有任何股票設定期權時間。"
+                reply_text = "目前試算表中沒有任何股票設定期權時間或動作。"
 
         # ==========================================
         # 4. 輸入特定股票代碼（如 NKE、SOFI、MCD）
