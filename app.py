@@ -153,10 +153,6 @@ def callback():
                 ticker = get_col(row, 0)
                 price = get_col(row, 1)
                 name = get_col(row, 2)
-                position_status = get_col(row, 3) # D: 倉位狀態
-                buy_target = get_col(row, 4)      # E: 買入點位
-                sell_target = get_col(row, 5)     # F: 賣出點位
-                position_pct = get_col(row, 6)    # G: 倉位佔比%
                 note = get_col(row, 7)            # H: 筆記
                 action = get_col(row, 8)          # I: (BUY/SELL)
                 option_exp = get_col(row, 9)      # J: 期權時間
