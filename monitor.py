@@ -61,10 +61,10 @@ def check_stock():
     previous_state = load_previous_state()
     current_state = {}
 
-    # 取得現金比例
-    val_f2 = get_col(all_rows[1], 5) if len(all_rows) >= 2 else ""
+    # 取得現金比例（欄位順延至 G2 與 H2，即 Index 6 與 7）
     val_g2 = get_col(all_rows[1], 6) if len(all_rows) >= 2 else ""
-    current_cash = f"{val_f2} ({val_g2})".strip()
+    val_h2 = get_col(all_rows[1], 7) if len(all_rows) >= 2 else ""
+    current_cash = f"{val_g2} ({val_h2})".strip()
     prev_cash = previous_state.get("__CASH_RATIO__", "")
     current_state["__CASH_RATIO__"] = current_cash
 
@@ -74,8 +74,9 @@ def check_stock():
     if prev_cash and current_cash != prev_cash:
         alerts.append(f"🔄 【目標現金比例變更】\n舊值: {prev_cash} ➔ 新值: {current_cash}\n─────────────────")
 
-    # 欄位名稱對照表（用於標註哪一欄被修改）
+    # 欄位名稱對照表（用於標註哪一欄被修改，加入「倉位」）
     field_names = {
+        "status": "倉位狀態",
         "price": "現價",
         "buy": "買點",
         "sell": "賣點",
@@ -93,15 +94,17 @@ def check_stock():
 
         price_str = get_col(row, 1).replace("$", "").replace(",", "")
         name = get_col(row, 2)
-        buy_str = get_col(row, 3).replace("$", "").replace(",", "")
-        sell_str = get_col(row, 4).replace("$", "").replace(",", "")
-        position = get_col(row, 5)
-        note = get_col(row, 6)
-        action = get_col(row, 7)
-        option_exp = get_col(row, 8)
+        pos_status = get_col(row, 3)  # 新增：D 欄倉位（正式倉 / 觀察倉）
+        buy_str = get_col(row, 4).replace("$", "").replace(",", "")     # 順延至 E 欄
+        sell_str = get_col(row, 5).replace("$", "").replace(",", "")    # 順延至 F 欄
+        position = get_col(row, 6)                                      # 順延至 G 欄
+        note = get_col(row, 7)                                          # 順延至 H 欄
+        action = get_col(row, 8)                                        # 順延至 I 欄
+        option_exp = get_col(row, 9)                                    # 順延至 J 欄
 
         current_data = {
             "name": name,
+            "status": pos_status,
             "price": price_str,
             "buy": buy_str,
             "sell": sell_str,
@@ -147,9 +150,10 @@ def check_stock():
             if change_logs:
                 status_tags.append("📝 【資料內容更新】\n" + "\n".join(change_logs))
 
+            status_display = f" [{pos_status}]" if pos_status else ""
             card = [
                 "\n".join(status_tags),
-                f"📌 代碼: {ticker} ({name or '未填'})",
+                f"📌 代碼: {ticker} ({name or '未填'}){status_display}",
                 f"💲 現價: {price_str or '無'}",
                 f"🎯 買點: {buy_str or '無'} | 賣點: {sell_str or '無'}",
                 f"📊 倉位佔比: {position}%" if position else "📊 倉位佔比: 無",
