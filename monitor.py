@@ -80,7 +80,7 @@ def check_stock():
         "buy": "買點",
         "sell": "賣點",
         "position": "倉位佔比",
-        "action": "建議動作",
+        "action": "BUY/SELL",
         "option": "期權時間",
         "note": "筆記"
     }
@@ -155,7 +155,7 @@ def check_stock():
                 f"💲 現價: {price_str or '無'}",
                 f"🎯 買點: {buy_str or '無'} | 賣點: {sell_str or '無'}",
                 f"📊 倉位佔比: {position}%" if position else "📊 倉位佔比: 無",
-                f"⚡ 建議動作: {action or '無'}",
+                f"⚡ BUY/SELL: {action or '無'}",
                 f"⏳ 期權時間: {option_exp or '無'}",
                 f"📝 筆記: {note or '無'}",
                 "─────────────────"
