@@ -74,13 +74,14 @@ def check_stock():
     if prev_cash and current_cash != prev_cash:
         alerts.append(f"🔄 【目標現金比例變更】\n舊值: {prev_cash} ➔ 新值: {current_cash}\n─────────────────")
 
-    # 手動更新比對清單：已完全移除「現價」，避免股價跳動干擾通知
+    # 包含現價在內的比對清單
     field_names = {
+        "price": "現價",
         "status": "倉位狀態",
         "buy": "買點",
         "sell": "賣點",
         "position": "倉位佔比",
-        "action": "BUY/SELL",
+        "action": "動作",
         "option": "期權時間",
         "note": "筆記"
     }
@@ -104,6 +105,7 @@ def check_stock():
         current_data = {
             "name": name,
             "status": pos_status,
+            "price": price_str,
             "buy": buy_str,
             "sell": sell_str,
             "position": position,
@@ -113,18 +115,33 @@ def check_stock():
         }
         current_state[ticker] = current_data
 
-        # 1. 判斷是否有手動欄位更動（不含現價）
+        # 1. 判斷是否有內容更動（例如：價格 20 ➔ 30）
         change_logs = []
+        changed_fields = set()
+        
         if ticker in previous_state:
             prev_data = previous_state[ticker]
             for key, label in field_names.items():
                 old_val = prev_data.get(key, "")
                 new_val = current_data.get(key, "")
-                if old_val != new_val:
-                    change_logs.append(f"• {label}: {old_val or '無'} ➔ {new_val or '無'}")
+                
+                # 若為價格/點位，進行浮點數防呆比對（避免 20 與 20.0 誤判）
+                is_changed = False
+                if key in ["price", "buy", "sell"] and old_val != "" and new_val != "":
+                    try:
+                        if float(old_val) != float(new_val):
+                            is_changed = True
+                    except ValueError:
+                        is_changed = (old_val != new_val)
+                else:
+                    is_changed = (old_val != new_val)
+
+                if is_changed:
+                    changed_fields.add(key)
+                    change_logs.append(f"  • {label}: {old_val or '無'} ➔ {new_val or '無'}")
         else:
             if previous_state:  # 新增股票代碼
-                change_logs.append("• 新增股票代碼至試算表")
+                change_logs.append("  • 新增股票代碼至試算表")
 
         # 2. 判斷現價是否達到買賣點位
         signal_type = None
@@ -149,13 +166,19 @@ def check_stock():
                 status_tags.append("📝 【資料內容更新】\n" + "\n".join(change_logs))
 
             status_display = f" [{pos_status}]" if pos_status else ""
+            
+            # 若為欄位內容更新，在下方欄位特別加上標註提醒
+            price_display = f"{price_str or '無'}"
+            buy_display = f"{buy_str or '無'}"
+            sell_display = f"{sell_str or '無'}"
+            
             card = [
                 "\n".join(status_tags),
                 f"📌 代碼: {ticker} ({name or '未填'}){status_display}",
-                f"💲 現價: {price_str or '無'}",
-                f"🎯 買點: {buy_str or '無'} | 賣點: {sell_str or '無'}",
+                f"💲 現價: {price_display}",
+                f"🎯 買點: {buy_display} | 賣點: {sell_display}",
                 f"📊 倉位佔比: {position}%" if position else "📊 倉位佔比: 無",
-                f"⚡ BUY/SELL: {action or '無'}",
+                f"⚡ 動作: {action or '無'}",
                 f"⏳ 期權時間: {option_exp or '無'}",
                 f"📝 筆記: {note or '無'}",
                 "─────────────────"
