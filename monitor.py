@@ -16,19 +16,31 @@ SHEET_ID = os.environ.get("GOOGLE_SHEET_ID")
 CREDS_JSON_STR = os.environ.get("GOOGLE_CREDS_JSON")
 STATE_FILE = "last_state.json"
 
-def send_line_broadcast(text):
-    logger.info("▶ 正在呼叫 LINE Broadcast API...")
+def send_line_broadcast_messages(message_list):
+    """
+    呼叫 LINE Broadcast API。
+    LINE 單次呼叫 messages 陣列最多容納 5 則訊息，此處自動以 5 則為單位分批發送。
+    """
+    if not message_list:
+        return
+
     url = "https://api.line.me/v2/bot/message/broadcast"
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {LINE_TOKEN}"
     }
-    data = {
-        "messages": [{"type": "text", "text": text}]
-    }
-    resp = requests.post(url, headers=headers, json=data, timeout=10)
-    logger.info(f"LINE API 回應代碼: HTTP {resp.status_code}")
-    logger.info(f"LINE API 回應內容: {resp.text}")
+
+    # 每 5 則訊息切分成一個批次
+    chunk_size = 5
+    for i in range(0, len(message_list), chunk_size):
+        batch = message_list[i:i + chunk_size]
+        data = {
+            "messages": [{"type": "text", "text": msg} for msg in batch]
+        }
+        logger.info(f"▶ 正在發送 LINE 廣播 (包含 {len(batch)} 則訊息)...")
+        resp = requests.post(url, headers=headers, json=data, timeout=10)
+        logger.info(f"LINE API 回應代碼: HTTP {resp.status_code}")
+        logger.info(f"LINE API 回應內容: {resp.text}")
 
 def get_col(row, idx):
     if idx < len(row):
@@ -61,22 +73,26 @@ def check_stock():
     previous_state = load_previous_state()
     current_state = {}
 
-    # 取得現金比例（G2 與 H2）
+    changed_cards = []  # 收集各檔異動卡片
+
+    # 1. 檢查現金比例（G2 與 H2）
     val_g2 = get_col(all_rows[1], 6) if len(all_rows) >= 2 else ""
     val_h2 = get_col(all_rows[1], 7) if len(all_rows) >= 2 else ""
     current_cash = f"{val_g2} ({val_h2})".strip()
     prev_cash = previous_state.get("__CASH_RATIO__", "")
     current_state["__CASH_RATIO__"] = current_cash
 
-    alerts = []
-
-    # 現金比例有更動時推播
+    # 若現金比例異動，加入為一個特殊卡片
     if prev_cash and current_cash != prev_cash:
-        alerts.append(f"🔄 【目標現金比例變更】\n舊值: {prev_cash} ➔ 新值: {current_cash}\n─────────────────")
+        cash_card = [
+            "💰【目標現金比例變更】",
+            f"  • 原設定: {prev_cash}",
+            f"  • 新調整: {current_cash}"
+        ]
+        changed_cards.append("\n".join(cash_card))
 
-    # 包含現價在內的比對清單
-    field_names = {
-        "price": "現價",
+    # 追蹤欄位（排除 price 現價）
+    tracked_fields = {
         "status": "倉位狀態",
         "buy": "買點",
         "sell": "賣點",
@@ -115,19 +131,19 @@ def check_stock():
         }
         current_state[ticker] = current_data
 
-        # 1. 判斷是否有內容更動（例如：價格 20 ➔ 30）
+        # 比對欄位異動
         change_logs = []
         changed_fields = set()
-        
+
         if ticker in previous_state:
             prev_data = previous_state[ticker]
-            for key, label in field_names.items():
+            for key, label in tracked_fields.items():
                 old_val = prev_data.get(key, "")
                 new_val = current_data.get(key, "")
-                
-                # 若為價格/點位，進行浮點數防呆比對（避免 20 與 20.0 誤判）
+
+                # 買賣點進行浮點數防呆
                 is_changed = False
-                if key in ["price", "buy", "sell"] and old_val != "" and new_val != "":
+                if key in ["buy", "sell"] and old_val != "" and new_val != "":
                     try:
                         if float(old_val) != float(new_val):
                             is_changed = True
@@ -143,58 +159,72 @@ def check_stock():
             if previous_state:  # 新增股票代碼
                 change_logs.append("  • 新增股票代碼至試算表")
 
-        # 2. 判斷現價是否達到買賣點位
-        signal_type = None
-        try:
-            price = float(price_str)
-            buy_val = float(buy_str) if buy_str else None
-            sell_val = float(sell_str) if sell_str else None
-
-            if buy_val is not None and price <= buy_val:
-                signal_type = f"🟢 【買入訊號】達買點: {buy_val}"
-            elif sell_val is not None and price >= sell_val:
-                signal_type = f"🔴 【賣出訊號】達賣點: {sell_val}"
-        except ValueError:
-            pass
-
-        # 3. 滿足條件時打包訊息
-        if change_logs or signal_type:
-            status_tags = []
-            if signal_type:
-                status_tags.append(signal_type)
-            if change_logs:
-                status_tags.append("📝 【資料內容更新】\n" + "\n".join(change_logs))
+        # 組成單檔卡片
+        if change_logs:
+            mark = lambda field: " 👈 [已更新]" if field in changed_fields else ""
 
             status_display = f" [{pos_status}]" if pos_status else ""
-            
-            # 若為欄位內容更新，在下方欄位特別加上標註提醒
-            price_display = f"{price_str or '無'}"
-            buy_display = f"{buy_str or '無'}"
-            sell_display = f"{sell_str or '無'}"
-            
-            card = [
-                "\n".join(status_tags),
-                f"📌 代碼: {ticker} ({name or '未填'}){status_display}",
-                f"💲 現價: {price_display}",
-                f"🎯 買點: {buy_display} | 賣點: {sell_display}",
-                f"📊 倉位佔比: {position}%" if position else "📊 倉位佔比: 無",
-                f"⚡ 動作: {action or '無'}",
-                f"⏳ 期權時間: {option_exp or '無'}",
-                f"📝 筆記: {note or '無'}",
-                "─────────────────"
-            ]
-            alerts.append("\n".join(card))
+            pos_tag = mark("status")
+            buy_tag = mark("buy")
+            sell_tag = mark("sell")
+            position_tag = mark("position")
+            action_tag = mark("action")
+            option_tag = mark("option")
+            note_tag = mark("note")
 
-    # 儲存最新狀態
+            card = [
+                f"📌 代碼: {ticker} ({name or '未填'}){status_display}{pos_tag}",
+                f"📝 異動: \n" + "\n".join(change_logs),
+                f"----------------------------",
+                f"💲 現價: {price_str or '無'}",
+                f"🎯 買點: {buy_str or '無'}{buy_tag} | 賣點: {sell_str or '無'}{sell_tag}",
+                f"📊 倉位佔比: {position}%{position_tag}" if position else f"📊 倉位佔比: 無{position_tag}",
+                f"⚡ 動作: {action or '無'}{action_tag}",
+                f"⏳ 期權時間: {option_exp or '無'}{option_tag}",
+                f"📝 筆記: {note or '無'}{note_tag}"
+            ]
+            changed_cards.append("\n".join(card))
+
+    # 儲存最新狀態檔
     save_current_state(current_state)
 
-    # 4. 發送通知
-    if alerts:
-        header = f"🔔【美股即時更新推播】\n💰 目標現金比例：{current_cash}\n─────────────────\n"
-        full_message = header + "\n".join(alerts)
-        send_line_broadcast(full_message)
+    # 2. 合併打包並發送
+    if not changed_cards:
+        logger.info("ℹ️ 無手動修改資料，不發送通知。")
+        return
+
+    logger.info(f"檢測到 {len(changed_cards)} 筆異動，正在組裝合併通知...")
+
+    header = (
+        f"🔔【美股持股異動通知】\n"
+        f"本次共更新 {len(changed_cards)} 檔標的\n"
+        f"═════════════════════════\n"
+    )
+
+    # 區塊間使用粗雙線分隔，確保視覺層級清晰
+    block_separator = "\n\n═════════════════════════\n\n"
+    combined_body = block_separator.join(changed_cards)
+    full_text = header + combined_body
+
+    # 防呆：若總字數接近 LINE 5,000 字限制，自動切成多則訊息同時發送
+    messages_to_send = []
+    if len(full_text) > 4000:
+        chunk = header
+        for card in changed_cards:
+            appended = card + block_separator
+            if len(chunk) + len(appended) > 4000:
+                messages_to_send.append(chunk.rstrip("\n═"))
+                chunk = appended
+            else:
+                chunk += appended
+        if chunk.strip():
+            messages_to_send.append(chunk.rstrip("\n═"))
     else:
-        logger.info("ℹ️ 無手動修改資料或達到買賣點位，不推播。")
+        messages_to_send.append(full_text)
+
+    # 一次 API 呼叫批次推播
+    send_line_broadcast_messages(messages_to_send)
+    logger.info("✅ 已完成單次合併推播。")
 
 if __name__ == "__main__":
     check_stock()
