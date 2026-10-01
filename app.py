@@ -54,20 +54,30 @@ def get_all_sheet_rows(force_refresh=False):
     SHEET_CACHE["last_update"] = current_time
     return data
 
-def reply_line(reply_token, text):
-    """回覆訊息給 LINE"""
+def reply_line(reply_token, messages):
+    """
+    回覆訊息給 LINE (支援單一字串或多則字串陣列)
+    LINE 一次 Reply 最多支援 5 則 messages。
+    """
     url = "https://api.line.me/v2/bot/message/reply"
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {LINE_TOKEN}"
     }
-    # LINE 單則訊息上限為 5000 字元，避免長度超標出錯
-    if len(text) > 4500:
-        text = text[:4500] + "\n\n...(因訊息長度過長，已自動截斷)..."
+
+    if isinstance(messages, str):
+        messages = [messages]
+
+    # 每則訊息長度防呆（單則最多 4500 字元避免 5000 字上限）
+    formatted_messages = []
+    for msg in messages[:5]:  # LINE 限制最多 5 則
+        if len(msg) > 4500:
+            msg = msg[:4500] + "\n\n...(因訊息篇幅過長已自動截斷)..."
+        formatted_messages.append({"type": "text", "text": msg})
 
     data = {
         "replyToken": reply_token,
-        "messages": [{"type": "text", "text": text}]
+        "messages": formatted_messages
     }
     try:
         resp = requests.post(url, headers=headers, json=data, timeout=10)
@@ -139,24 +149,74 @@ def callback():
             reply_line(reply_token, "⚠️ 讀取試算表資料失敗，請稍後再試。")
             continue
 
-        reply_text = ""
+        # ==========================================
+        # 3. 處理「清單」/「全部」關鍵字（顯示試算表全部股票）
+        # ==========================================
+        if user_msg in ["清單", "全部", "股票清單", "全部清單", "ALL"]:
+            results = []
+            for row in stock_rows:
+                ticker = get_col(row, 0)
+                if not ticker:
+                    continue
+
+                price = get_col(row, 1)
+                name = get_col(row, 2)
+                position_status = get_col(row, 3)
+                buy_target = get_col(row, 4)
+                sell_target = get_col(row, 5)
+                position_pct = get_col(row, 6)
+                note = get_col(row, 7)
+                action = get_col(row, 8)
+                option_exp = get_col(row, 9)
+
+                pos_pct_display = f"{position_pct}%" if position_pct else "無"
+                status_display = f" [{position_status}]" if position_status else ""
+
+                card = [
+                    f"📌 【{ticker}】{name}{status_display}",
+                    f"💲 現價: {price or '無'}",
+                    f"🎯 買點: {buy_target or '無'} | 賣點: {sell_target or '無'}",
+                    f"📊 倉位佔比: {pos_pct_display}",
+                    f"⚡ 動作/期權: {action or '無'}",
+                    f"⏳ 期權時間: {option_exp or '無'}",
+                    f"📝 筆記: {note or '無'}"
+                ]
+                results.append("\n".join(card))
+
+            if not results:
+                reply_line(reply_token, "目前試算表中沒有任何股票資料。")
+                continue
+
+            # 分批組裝成訊息（每 8 檔包裝成一則訊息，避免篇幅爆掉）
+            chunk_size = 8
+            messages_to_send = []
+            total_count = len(results)
+
+            for i in range(0, total_count, chunk_size):
+                chunk = results[i:i + chunk_size]
+                page_header = f"📋【試算表全股票清單】(第 {i+1}~{min(i+chunk_size, total_count)} 檔 / 共 {total_count} 檔)\n─────────────────\n\n"
+                page_body = "\n\n─────────────────\n\n".join(chunk)
+                messages_to_send.append(page_header + page_body)
+
+            reply_line(reply_token, messages_to_send)
+            continue
 
         # ==========================================
-        # 3. 處理「買點」查詢
+        # 4. 處理「買點」查詢
         # ==========================================
-        if user_msg in ["買點", "🎯 買點", "查詢買點"]:
+        elif user_msg in ["買點", "🎯 買點", "查詢買點"]:
             results = []
             for row in stock_rows:
                 ticker = get_col(row, 0)
                 price = get_col(row, 1)
                 name = get_col(row, 2)
-                position_status = get_col(row, 3)  # D: 倉位狀態
-                buy_target = get_col(row, 4)       # E: 買入點位
-                sell_target = get_col(row, 5)      # F: 賣出點位
-                position_pct = get_col(row, 6)     # G: 倉位佔比%
-                note = get_col(row, 7)             # H: 筆記
-                action = get_col(row, 8)           # I: 動作
-                option_exp = get_col(row, 9)       # J: 期權時間
+                position_status = get_col(row, 3)
+                buy_target = get_col(row, 4)
+                sell_target = get_col(row, 5)
+                position_pct = get_col(row, 6)
+                note = get_col(row, 7)
+                action = get_col(row, 8)
+                option_exp = get_col(row, 9)
 
                 if ticker and buy_target:
                     pos_pct_display = f"{position_pct}%" if position_pct else "無"
@@ -175,9 +235,10 @@ def callback():
                 reply_text = f"🎯【有設定買點之清單】(共 {len(results)} 檔)：\n\n" + "\n\n─────────────────\n\n".join(results)
             else:
                 reply_text = "目前試算表中沒有任何股票設定買點。"
+            reply_line(reply_token, reply_text)
 
         # ==========================================
-        # 4. 處理「賣點」查詢
+        # 5. 處理「賣點」查詢
         # ==========================================
         elif user_msg in ["賣點", "🔴 賣點", "查詢賣點"]:
             results = []
@@ -185,13 +246,13 @@ def callback():
                 ticker = get_col(row, 0)
                 price = get_col(row, 1)
                 name = get_col(row, 2)
-                position_status = get_col(row, 3)  # D: 倉位狀態
-                buy_target = get_col(row, 4)       # E: 買入點位
-                sell_target = get_col(row, 5)      # F: 賣出點位
-                position_pct = get_col(row, 6)     # G: 倉位佔比%
-                note = get_col(row, 7)             # H: 筆記
-                action = get_col(row, 8)           # I: 動作
-                option_exp = get_col(row, 9)       # J: 期權時間
+                position_status = get_col(row, 3)
+                buy_target = get_col(row, 4)
+                sell_target = get_col(row, 5)
+                position_pct = get_col(row, 6)
+                note = get_col(row, 7)
+                action = get_col(row, 8)
+                option_exp = get_col(row, 9)
 
                 if ticker and sell_target:
                     pos_pct_display = f"{position_pct}%" if position_pct else "無"
@@ -210,23 +271,22 @@ def callback():
                 reply_text = f"🎯【有設定賣點之清單】(共 {len(results)} 檔)：\n\n" + "\n\n─────────────────\n\n".join(results)
             else:
                 reply_text = "目前試算表中沒有任何股票設定賣點。"
+            reply_line(reply_token, reply_text)
 
         # ==========================================
-        # 5. 處理「選擇權」查詢
+        # 6. 處理「選擇權」查詢
         # ==========================================
         elif user_msg in ["選擇權", "期權", "⏳ 選擇權", "期權清單"]:
             results = []
             for row in stock_rows:
-                ticker = get_col(row, 0)          # A: 股票代碼
-                price = get_col(row, 1)           # B: 現價
-                name = get_col(row, 2)            # C: 公司名稱
-                position_status = get_col(row, 3) # D: 倉位狀態
-                position_pct = get_col(row, 6)    # G: 倉位佔比%
-                note = get_col(row, 7)            # H: 筆記
-                action = get_col(row, 8)          # I: 動作 / 期權內容 (例如 BUY CALL)
-                option_exp = get_col(row, 9)      # J: 期權時間 / 到期日
+                ticker = get_col(row, 0)
+                price = get_col(row, 1)
+                name = get_col(row, 2)
+                position_status = get_col(row, 3)
+                note = get_col(row, 7)
+                action = get_col(row, 8)
+                option_exp = get_col(row, 9)
 
-                # 只要動作 (I欄) 或期權時間 (J欄) 有填寫就列出
                 if ticker and (action or option_exp):
                     card = [
                         f"⏳ 【{ticker}】{name}" + (f" [{position_status}]" if position_status else ""),
@@ -240,10 +300,11 @@ def callback():
             if results:
                 reply_text = f"📊【期權清單】(共 {len(results)} 檔)：\n\n" + "\n\n─────────────────\n\n".join(results)
             else:
-                reply_text = "目前試算表中沒有任何股票設定期權內容或時間。"
+                reply_text = "目前試算表中沒有任何股票設定期權時間或動作。"
+            reply_line(reply_token, reply_text)
 
         # ==========================================
-        # 6. 輸入特定股票代碼（如 NKE、SOFI、MCD）
+        # 7. 輸入特定股票代碼（如 NKE、SOFI、MCD）
         # ==========================================
         else:
             ticker_query = user_msg.upper()
@@ -269,10 +330,9 @@ def callback():
             else:
                 reply_text = (
                     f"查無指令或股票代碼【{user_msg}】。\n\n"
-                    f"💡 你可以直接點擊下方選單「買點」、「賣點」、「選擇權」，或直接輸入股票代碼（如 SOFI、MCD）。"
+                    f"💡 你可以直接點擊下方選單「買點」、「賣點」、「選擇權」，或輸入「清單」查看全部股票，亦可輸入代碼（如 SOFI、MCD）。"
                 )
-
-        reply_line(reply_token, reply_text)
+            reply_line(reply_token, reply_text)
 
     return jsonify({"status": "ok"}), 200
 
