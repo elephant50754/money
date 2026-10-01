@@ -1,5 +1,6 @@
 import os
 import json
+import time
 import logging
 import requests
 import gspread
@@ -18,6 +19,13 @@ LINE_TOKEN = os.environ.get("LINE_CHANNEL_ACCESS_TOKEN")
 SHEET_ID = os.environ.get("GOOGLE_SHEET_ID")
 CREDS_JSON_STR = os.environ.get("GOOGLE_CREDS_JSON")
 
+# 快取機制：避免每次點選按鈕都要連線 Google API 導致逾時
+SHEET_CACHE = {
+    "data": [],
+    "last_update": 0
+}
+CACHE_TTL = 30  # 快取 30 秒
+
 def get_col(row, idx):
     """安全取得欄位字串"""
     if idx < len(row):
@@ -25,13 +33,22 @@ def get_col(row, idx):
     return ""
 
 def get_all_sheet_rows():
-    """連線 Google Sheets 並抓取全部資料列"""
+    """連線 Google Sheets 並抓取全部資料列 (含快取機制)"""
+    current_time = time.time()
+    if SHEET_CACHE["data"] and (current_time - SHEET_CACHE["last_update"] < CACHE_TTL):
+        return SHEET_CACHE["data"]
+
     creds_info = json.loads(CREDS_JSON_STR)
     scopes = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
     credentials = Credentials.from_service_account_info(creds_info, scopes=scopes)
     gc = gspread.authorize(credentials)
     sheet = gc.open_by_key(SHEET_ID).sheet1
-    return sheet.get_all_values()
+    data = sheet.get_all_values()
+
+    # 更新快取
+    SHEET_CACHE["data"] = data
+    SHEET_CACHE["last_update"] = current_time
+    return data
 
 def reply_line(reply_token, text):
     """回覆 LINE 訊息"""
@@ -40,12 +57,18 @@ def reply_line(reply_token, text):
         "Content-Type": "application/json",
         "Authorization": f"Bearer {LINE_TOKEN}"
     }
+    # LINE 單則訊息上限 5000 字元
+    if len(text) > 4500:
+        text = text[:4500] + "\n\n...(因訊息篇幅過長，已截斷)..."
+
     data = {
         "replyToken": reply_token,
         "messages": [{"type": "text", "text": text}]
     }
     resp = requests.post(url, headers=headers, json=data, timeout=10)
     logger.info(f"LINE Reply 狀態: HTTP {resp.status_code}")
+    if resp.status_code != 200:
+        logger.error(f"LINE Reply 錯誤內容: {resp.text}")
 
 @app.route("/", methods=["GET"])
 def health_check():
@@ -75,9 +98,9 @@ def callback():
         reply_text = ""
 
         # ==========================================
-        # 1. 處理圖文選單「買點」按鈕 (E欄為買點)
+        # 1. 處理「買點」按鈕 (包含常見圖文選單格式)
         # ==========================================
-        if user_msg == "買點":
+        if user_msg in ["買點", "🎯 買點", "查詢買點"]:
             results = []
             for row in stock_rows:
                 ticker = get_col(row, 0)
@@ -88,7 +111,7 @@ def callback():
                 sell_target = get_col(row, 5)     # F: 賣出點位
                 position_pct = get_col(row, 6)    # G: 倉位佔比%
                 note = get_col(row, 7)            # H: 筆記
-                action = get_col(row, 8)          # I: (BUY/SELL)
+                action = get_col(row, 8)          # I: 動作
                 option_exp = get_col(row, 9)      # J: 期權時間
 
                 if ticker and buy_target:
@@ -110,9 +133,9 @@ def callback():
                 reply_text = "目前試算表中沒有任何股票設定買點。"
 
         # ==========================================
-        # 2. 處理圖文選單「賣點」按鈕 (F欄為賣點)
+        # 2. 處理「賣點」按鈕
         # ==========================================
-        elif user_msg == "賣點":
+        elif user_msg in ["賣點", "🔴 賣點", "查詢賣點"]:
             results = []
             for row in stock_rows:
                 ticker = get_col(row, 0)
@@ -123,7 +146,7 @@ def callback():
                 sell_target = get_col(row, 5)     # F: 賣出點位
                 position_pct = get_col(row, 6)    # G: 倉位佔比%
                 note = get_col(row, 7)            # H: 筆記
-                action = get_col(row, 8)          # I: (BUY/SELL)
+                action = get_col(row, 8)          # I: 動作
                 option_exp = get_col(row, 9)      # J: 期權時間
 
                 if ticker and sell_target:
@@ -145,16 +168,18 @@ def callback():
                 reply_text = "目前試算表中沒有任何股票設定賣點。"
 
         # ==========================================
-        # 3. 處理圖文選單「選擇權」按鈕 (包含動作與期權時間)
+        # 3. 處理「選擇權」按鈕 (修復原先變數未定義的 Bug)
         # ==========================================
-        elif user_msg == "選擇權":
+        elif user_msg in ["選擇權", "期權", "⏳ 選擇權", "期權清單"]:
             results = []
             for row in stock_rows:
                 ticker = get_col(row, 0)          # A: 股票代碼
                 price = get_col(row, 1)           # B: 現價
                 name = get_col(row, 2)            # C: 公司名稱
+                position_status = get_col(row, 3) # D: 倉位狀態 (已修復補上)
+                position_pct = get_col(row, 6)    # G: 倉位佔比% (已修復補上)
                 note = get_col(row, 7)            # H: 筆記
-                action = get_col(row, 8)          # I: BUY/SELL (動作)
+                action = get_col(row, 8)          # I: 動作
                 option_exp = get_col(row, 9)      # J: 期權時間
 
                 # 只要期權時間 (J欄) 或動作 (I欄) 有資料就列出
@@ -163,6 +188,7 @@ def callback():
                     card = [
                         f"⏳ 【{ticker}】{name} [{position_status or '未分類'}]",
                         f"💲 現價: {price}",
+                        f"📊 倉位佔比: {pos_pct_display}",
                         f"⚡ 動作: {action or '無'}",
                         f"⏳ 期權時間: {option_exp or '無'}",
                         f"📝 筆記: {note or '無'}"
