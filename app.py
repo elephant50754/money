@@ -223,16 +223,15 @@ def callback():
                 position_status = get_col(row, 3) # D: 倉位狀態
                 position_pct = get_col(row, 6)    # G: 倉位佔比%
                 note = get_col(row, 7)            # H: 筆記
-                action = get_col(row, 8)          # I: 動作
-                option_exp = get_col(row, 9)      # J: 期權時間
+                action = get_col(row, 8)          # I: 動作 / 期權內容 (例如 BUY CALL)
+                option_exp = get_col(row, 9)      # J: 期權時間 / 到期日
 
-                if ticker and (option_exp or action):
-                    pos_pct_display = f"{position_pct}%" if position_pct else "無"
+                # 只要動作 (I欄) 或期權時間 (J欄) 有填寫就列出
+                if ticker and (action or option_exp):
                     card = [
-                        f"⏳ 【{ticker}】{name} [{position_status or '未分類'}]",
-                        f"💲 現價: {price}",
-                        f"📊 倉位佔比: {pos_pct_display}",
-                        f"⚡ 動作: {action or '無'}",
+                        f"⏳ 【{ticker}】{name}" + (f" [{position_status}]" if position_status else ""),
+                        f"💲 現價: {price or '無'}",
+                        f"⚡ 動作/期權內容: {action or '無'}",
                         f"⏳ 期權時間: {option_exp or '無'}",
                         f"📝 筆記: {note or '無'}"
                     ]
@@ -241,7 +240,7 @@ def callback():
             if results:
                 reply_text = f"📊【期權清單】(共 {len(results)} 檔)：\n\n" + "\n\n─────────────────\n\n".join(results)
             else:
-                reply_text = "目前試算表中沒有任何股票設定期權時間或動作。"
+                reply_text = "目前試算表中沒有任何股票設定期權內容或時間。"
 
         # ==========================================
         # 6. 輸入特定股票代碼（如 NKE、SOFI、MCD）
