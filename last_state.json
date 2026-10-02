@@ -3,7 +3,7 @@
   "NKE": {
     "name": "Nike Inc",
     "status": "重倉",
-    "price": "33.00",
+    "price": "33.81",
     "buy": "40.00",
     "sell": "80.00",
     "position": "20",
@@ -14,7 +14,7 @@
   "SOFI": {
     "name": "SoFi Technologies Inc",
     "status": "正式倉",
-    "price": "15.98",
+    "price": "15.91",
     "buy": "17.00",
     "sell": "30.00",
     "position": "8",
@@ -25,7 +25,7 @@
   "BULL": {
     "name": "Webull Corp",
     "status": "正式倉",
-    "price": "7.31",
+    "price": "7.41",
     "buy": "5.00",
     "sell": "15.00",
     "position": "8",
@@ -36,7 +36,7 @@
   "KMX": {
     "name": "Carmax Inc",
     "status": "正式倉",
-    "price": "55.80",
+    "price": "54.56",
     "buy": "45.00",
     "sell": "",
     "position": "4",
@@ -47,7 +47,7 @@
   "UPS": {
     "name": "United Parcel Service Inc",
     "status": "正式倉",
-    "price": "94.06",
+    "price": "92.97",
     "buy": "90.00",
     "sell": "115.00",
     "position": "4",
@@ -58,7 +58,7 @@
   "BX": {
     "name": "Blackstone Inc",
     "status": "正式倉",
-    "price": "113.62",
+    "price": "112.92",
     "buy": "120.00",
     "sell": "",
     "position": "4",
@@ -69,7 +69,7 @@
   "UBER": {
     "name": "Uber Technologies Inc",
     "status": "正式倉",
-    "price": "67.36",
+    "price": "68.22",
     "buy": "70.00",
     "sell": "80.00",
     "position": "3",
@@ -80,7 +80,7 @@
   "PFE": {
     "name": "Pfizer Inc",
     "status": "正式倉",
-    "price": "28.08",
+    "price": "27.55",
     "buy": "25.00",
     "sell": "",
     "position": "3",
@@ -91,7 +91,7 @@
   "BA": {
     "name": "Boeing Co",
     "status": "正式倉",
-    "price": "193.19",
+    "price": "195.02",
     "buy": "200.00",
     "sell": "",
     "position": "2",
@@ -110,10 +110,21 @@
     "action": "",
     "option": ""
   },
+  "PG": {
+    "name": "Procter & Gamble Co",
+    "status": "觀察倉",
+    "price": "144.57",
+    "buy": "145.00",
+    "sell": "",
+    "position": "2",
+    "note": "NIKE跌到尿褲子，買點幫寶適尿布 (海倫仙度絲)(飛柔)(歐樂B)(幫寶適)(吉列刮鬍刀)不一定要跟著，直接買大盤也可以",
+    "action": "",
+    "option": ""
+  },
   "NFLX": {
     "name": "Netflix Inc",
     "status": "正式倉",
-    "price": "67.34",
+    "price": "67.08",
     "buy": "70.00",
     "sell": "",
     "position": "1",
@@ -124,7 +135,7 @@
   "SFM": {
     "name": "Sprouts Farmers Market Inc",
     "status": "正式倉",
-    "price": "65.27",
+    "price": "64.00",
     "buy": "65.00",
     "sell": "90.00",
     "position": "1",
@@ -135,7 +146,7 @@
   "WMT": {
     "name": "Walmart Inc",
     "status": "正式倉",
-    "price": "104.97",
+    "price": "104.14",
     "buy": "100.00",
     "sell": "",
     "position": "0.5",
@@ -146,11 +157,22 @@
   "MCD": {
     "name": "McDonald's Corp",
     "status": "觀察倉",
-    "price": "231.50",
+    "price": "231.64",
     "buy": "220.00",
     "sell": "",
     "position": "",
     "note": "跌破220先別急著買，到時候在分析",
+    "action": "",
+    "option": ""
+  },
+  "WYNN": {
+    "name": "Wynn Resorts Ltd",
+    "status": "觀察倉",
+    "price": "76.68",
+    "buy": "80.00",
+    "sell": "",
+    "position": "0.25",
+    "note": "賭場",
     "action": "",
     "option": ""
   }
