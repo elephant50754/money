@@ -175,5 +175,27 @@
     "note": "賭場",
     "action": "",
     "option": ""
+  },
+  "GOOG": {
+    "name": "Alphabet Inc Class C",
+    "status": "正式倉",
+    "price": "320.76",
+    "buy": "300.00",
+    "sell": "",
+    "position": "6",
+    "note": "320買回一些些0.25%倉位(月底財報開得不好的話，跌幅會很大到時候再繼續買)",
+    "action": "",
+    "option": ""
+  },
+  "META": {
+    "name": "Meta Platforms Inc",
+    "status": "正式倉",
+    "price": "648.85",
+    "buy": "550.00",
+    "sell": "",
+    "position": "2",
+    "note": "600可以小買個0.25%倉位",
+    "action": "",
+    "option": ""
   }
 }
