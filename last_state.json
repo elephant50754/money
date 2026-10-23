@@ -3,7 +3,7 @@
   "NKE": {
     "name": "Nike Inc",
     "status": "重倉",
-    "price": "38.32",
+    "price": "37.40",
     "buy": "40.00",
     "sell": "80.00",
     "position": "20",
@@ -14,7 +14,7 @@
   "SOFI": {
     "name": "SoFi Technologies Inc",
     "status": "正式倉",
-    "price": "14.77",
+    "price": "14.39",
     "buy": "17.00",
     "sell": "30.00",
     "position": "10",
@@ -25,7 +25,7 @@
   "BULL": {
     "name": "Webull Corp",
     "status": "正式倉",
-    "price": "5.91",
+    "price": "5.77",
     "buy": "5.00",
     "sell": "15.00",
     "position": "5",
@@ -36,7 +36,7 @@
   "KMX": {
     "name": "Carmax Inc",
     "status": "正式倉",
-    "price": "52.96",
+    "price": "50.58",
     "buy": "45.00",
     "sell": "",
     "position": "4",
@@ -47,7 +47,7 @@
   "UPS": {
     "name": "United Parcel Service Inc",
     "status": "正式倉",
-    "price": "101.52",
+    "price": "99.43",
     "buy": "90.00",
     "sell": "115.00",
     "position": "4",
@@ -58,7 +58,7 @@
   "BX": {
     "name": "Blackstone Inc",
     "status": "正式倉",
-    "price": "118.75",
+    "price": "116.51",
     "buy": "120.00",
     "sell": "",
     "position": "4",
@@ -69,7 +69,7 @@
   "UBER": {
     "name": "Uber Technologies Inc",
     "status": "正式倉",
-    "price": "69.07",
+    "price": "67.71",
     "buy": "70.00",
     "sell": "80.00",
     "position": "5",
@@ -80,7 +80,7 @@
   "PFE": {
     "name": "Pfizer Inc",
     "status": "正式倉",
-    "price": "30.42",
+    "price": "29.89",
     "buy": "25.00",
     "sell": "",
     "position": "3",
@@ -91,7 +91,7 @@
   "BA": {
     "name": "Boeing Co",
     "status": "正式倉",
-    "price": "187.55",
+    "price": "184.42",
     "buy": "200.00",
     "sell": "",
     "position": "2",
@@ -102,7 +102,7 @@
   "RC": {
     "name": "Ready Capital Corp",
     "status": "正式倉",
-    "price": "1.01",
+    "price": "0.99",
     "buy": "2.00",
     "sell": "",
     "position": "2",
@@ -113,7 +113,7 @@
   "PG": {
     "name": "Procter & Gamble Co",
     "status": "正式倉",
-    "price": "165.59",
+    "price": "161.67",
     "buy": "145.00",
     "sell": "",
     "position": "2",
@@ -124,7 +124,7 @@
   "NFLX": {
     "name": "Netflix Inc",
     "status": "正式倉",
-    "price": "67.05",
+    "price": "66.86",
     "buy": "70.00",
     "sell": "",
     "position": "1",
@@ -135,7 +135,7 @@
   "SFM": {
     "name": "Sprouts Farmers Market Inc",
     "status": "正式倉",
-    "price": "68.86",
+    "price": "66.08",
     "buy": "65.00",
     "sell": "90.00",
     "position": "2",
@@ -146,7 +146,7 @@
   "WMT": {
     "name": "Walmart Inc",
     "status": "正式倉",
-    "price": "121.12",
+    "price": "120.35",
     "buy": "100.00",
     "sell": "",
     "position": "0.5",
@@ -157,7 +157,7 @@
   "MCD": {
     "name": "McDonald's Corp",
     "status": "觀察倉",
-    "price": "252.63",
+    "price": "247.99",
     "buy": "220.00",
     "sell": "",
     "position": "",
@@ -168,7 +168,7 @@
   "WYNN": {
     "name": "Wynn Resorts Ltd",
     "status": "觀察倉",
-    "price": "75.13",
+    "price": "73.44",
     "buy": "80.00",
     "sell": "",
     "position": "0.25",
@@ -179,7 +179,7 @@
   "GOOG": {
     "name": "Alphabet Inc Class C",
     "status": "正式倉",
-    "price": "320.76",
+    "price": "320.28",
     "buy": "300.00",
     "sell": "",
     "position": "6",
@@ -190,7 +190,7 @@
   "META": {
     "name": "Meta Platforms Inc",
     "status": "正式倉",
-    "price": "648.85",
+    "price": "645.08",
     "buy": "550.00",
     "sell": "",
     "position": "2",
