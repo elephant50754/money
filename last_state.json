@@ -3,7 +3,7 @@
   "NKE": {
     "name": "Nike Inc",
     "status": "重倉",
-    "price": "37.60",
+    "price": "37.19",
     "buy": "40.00",
     "sell": "80.00",
     "position": "20",
@@ -13,19 +13,30 @@
   },
   "SOFI": {
     "name": "SoFi Technologies Inc",
-    "status": "正式倉",
-    "price": "16.86",
+    "status": "重倉",
+    "price": "17.06",
     "buy": "17.00",
     "sell": "30.00",
     "position": "10",
-    "note": "(目前生息不利於股價上漲)預計加到10%",
+    "note": "(目前生息不利於股價上漲)預計加到10%,",
     "action": "BUY CALL",
     "option": "SOFI 19/JAN/2029 Call"
+  },
+  "GOOG": {
+    "name": "Alphabet Inc Class C",
+    "status": "正式倉",
+    "price": "321.99",
+    "buy": "300.00",
+    "sell": "",
+    "position": "6",
+    "note": "320買回一些些0.25%倉位(月底財報開得不好的話，跌幅會很大到時候再繼續買)",
+    "action": "",
+    "option": ""
   },
   "BULL": {
     "name": "Webull Corp",
     "status": "正式倉",
-    "price": "5.49",
+    "price": "5.53",
     "buy": "5.00",
     "sell": "15.00",
     "position": "5",
@@ -36,7 +47,7 @@
   "KMX": {
     "name": "Carmax Inc",
     "status": "正式倉",
-    "price": "53.59",
+    "price": "53.85",
     "buy": "45.00",
     "sell": "",
     "position": "4",
@@ -47,7 +58,7 @@
   "UPS": {
     "name": "United Parcel Service Inc",
     "status": "正式倉",
-    "price": "104.78",
+    "price": "105.33",
     "buy": "90.00",
     "sell": "115.00",
     "position": "4",
@@ -58,7 +69,7 @@
   "BX": {
     "name": "Blackstone Inc",
     "status": "正式倉",
-    "price": "116.70",
+    "price": "117.12",
     "buy": "120.00",
     "sell": "",
     "position": "4",
@@ -69,9 +80,9 @@
   "UBER": {
     "name": "Uber Technologies Inc",
     "status": "正式倉",
-    "price": "64.93",
+    "price": "65.20",
     "buy": "70.00",
-    "sell": "80.00",
+    "sell": "100+",
     "position": "5",
     "note": "上調倉位(3%加到5%)",
     "action": "BUY CALL",
@@ -80,7 +91,7 @@
   "PFE": {
     "name": "Pfizer Inc",
     "status": "正式倉",
-    "price": "29.63",
+    "price": "29.41",
     "buy": "25.00",
     "sell": "",
     "position": "3",
@@ -91,11 +102,11 @@
   "BA": {
     "name": "Boeing Co",
     "status": "正式倉",
-    "price": "166.79",
+    "price": "166.76",
     "buy": "200.00",
     "sell": "",
-    "position": "2",
-    "note": "投資邏輯跟INTC一樣，美國不會讓自家沒有引擎，但不會像INTC那樣暴漲，做波段",
+    "position": "3~4%",
+    "note": "投資邏輯跟INTC一樣，美國不會讓自家沒有引擎(原本2%上調到3~4%)(後續操作180~190買1%，160~170買2%)",
     "action": "",
     "option": ""
   },
@@ -110,32 +121,32 @@
     "action": "",
     "option": ""
   },
-  "PG": {
-    "name": "Procter & Gamble Co",
+  "META": {
+    "name": "Meta Platforms Inc",
     "status": "正式倉",
-    "price": "158.97",
-    "buy": "145.00",
+    "price": "611.22",
+    "buy": "550.00",
     "sell": "",
     "position": "2",
-    "note": "NIKE跌到尿褲子，買點幫寶適尿布 (海倫仙度絲)(飛柔)(歐樂B)(幫寶適)(吉列刮鬍刀)不一定要跟著，直接買大盤也可以",
+    "note": "600可以小買個0.25%倉位",
     "action": "",
     "option": ""
   },
   "NFLX": {
     "name": "Netflix Inc",
     "status": "正式倉",
-    "price": "61.72",
+    "price": "61.90",
     "buy": "70.00",
     "sell": "",
-    "position": "1",
-    "note": "",
+    "position": "2",
+    "note": "原本1%加到2%",
     "action": "",
     "option": ""
   },
   "SFM": {
     "name": "Sprouts Farmers Market Inc",
     "status": "正式倉",
-    "price": "64.93",
+    "price": "62.18",
     "buy": "65.00",
     "sell": "90.00",
     "position": "2",
@@ -146,7 +157,7 @@
   "WMT": {
     "name": "Walmart Inc",
     "status": "正式倉",
-    "price": "118.87",
+    "price": "118.88",
     "buy": "100.00",
     "sell": "",
     "position": "0.5",
@@ -157,7 +168,7 @@
   "MCD": {
     "name": "McDonald's Corp",
     "status": "觀察倉",
-    "price": "251.13",
+    "price": "250.70",
     "buy": "220.00",
     "sell": "",
     "position": "",
@@ -168,7 +179,7 @@
   "WYNN": {
     "name": "Wynn Resorts Ltd",
     "status": "觀察倉",
-    "price": "71.77",
+    "price": "71.40",
     "buy": "80.00",
     "sell": "",
     "position": "0.25",
@@ -176,25 +187,14 @@
     "action": "",
     "option": ""
   },
-  "GOOG": {
-    "name": "Alphabet Inc Class C",
+  "PG": {
+    "name": "Procter & Gamble Co",
     "status": "正式倉",
-    "price": "321.20",
-    "buy": "300.00",
+    "price": "158.34",
+    "buy": "145.00",
     "sell": "",
-    "position": "6",
-    "note": "320買回一些些0.25%倉位(月底財報開得不好的話，跌幅會很大到時候再繼續買)",
-    "action": "",
-    "option": ""
-  },
-  "META": {
-    "name": "Meta Platforms Inc",
-    "status": "正式倉",
-    "price": "614.45",
-    "buy": "550.00",
-    "sell": "",
-    "position": "2",
-    "note": "600可以小買個0.25%倉位",
+    "position": "0.1",
+    "note": "原本2%意外驚喜短期突然漲上去（算是做了個10%小波段），幾乎清倉回補現金倉位（漲上去純屬意外,本來只是當防禦板塊布局）",
     "action": "",
     "option": ""
   }
