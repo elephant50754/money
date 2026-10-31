@@ -24,12 +24,12 @@
   },
   "GOOG": {
     "name": "Alphabet Inc Class C",
-    "status": "正式倉",
+    "status": "重倉",
     "price": "278.22",
     "buy": "300.00",
     "sell": "",
-    "position": "6",
-    "note": "(月底財報開得不好的話，跌幅會很大到時候再繼續買)(真的跌了開始回買，286~290買2%，275~285買3%)",
+    "position": "10",
+    "note": "原6%倉位重新買回上調至10%(286~290買2%，275~285買3%)",
     "action": "",
     "option": ""
   },
@@ -128,7 +128,7 @@
     "buy": "550.00",
     "sell": "",
     "position": "2",
-    "note": "600可以小買個0.25%倉位",
+    "note": "",
     "action": "",
     "option": ""
   },
@@ -197,5 +197,16 @@
     "note": "原本2%意外驚喜短期突然漲上去（算是做了個10%小波段），幾乎清倉回補現金倉位（漲上去純屬意外,本來只是當防禦板塊布局）",
     "action": "",
     "option": ""
+  },
+  "INTC": {
+    "name": "Intel Corp",
+    "status": "",
+    "price": "65.76",
+    "buy": "",
+    "sell": "",
+    "position": "",
+    "note": "既然都跌爛了,小賭一把開個CALL倉位",
+    "action": "BUY CALL",
+    "option": "INTC 21/JAN/2028 CALL"
   }
 }
