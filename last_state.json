@@ -3,7 +3,7 @@
   "NKE": {
     "name": "Nike Inc",
     "status": "重倉",
-    "price": "35.87",
+    "price": "35.75",
     "buy": "40.00",
     "sell": "80.00",
     "position": "15~12",
@@ -25,7 +25,7 @@
   "GOOG": {
     "name": "Alphabet Inc Class C",
     "status": "重倉",
-    "price": "276.40",
+    "price": "276.58",
     "buy": "300.00",
     "sell": "",
     "position": "10",
@@ -36,7 +36,7 @@
   "UBER": {
     "name": "Uber Technologies Inc",
     "status": "正式倉",
-    "price": "65.40",
+    "price": "64.70",
     "buy": "70.00",
     "sell": "100+",
     "position": "5",
@@ -47,7 +47,7 @@
   "BULL": {
     "name": "Webull Corp",
     "status": "正式倉",
-    "price": "4.28",
+    "price": "4.17",
     "buy": "5.00",
     "sell": "15.00",
     "position": "5",
@@ -58,7 +58,7 @@
   "UPS": {
     "name": "United Parcel Service Inc",
     "status": "正式倉",
-    "price": "109.88",
+    "price": "110.83",
     "buy": "90.00",
     "sell": "115.00",
     "position": "4",
@@ -69,7 +69,7 @@
   "BX": {
     "name": "Blackstone Inc",
     "status": "正式倉",
-    "price": "118.25",
+    "price": "119.35",
     "buy": "120.00",
     "sell": "",
     "position": "4",
@@ -80,7 +80,7 @@
   "KMX": {
     "name": "Carmax Inc",
     "status": "正式倉",
-    "price": "52.25",
+    "price": "52.63",
     "buy": "45.00",
     "sell": "",
     "position": "3",
@@ -91,7 +91,7 @@
   "PFE": {
     "name": "Pfizer Inc",
     "status": "正式倉",
-    "price": "28.40",
+    "price": "28.46",
     "buy": "25.00",
     "sell": "",
     "position": "3",
@@ -102,7 +102,7 @@
   "BA": {
     "name": "Boeing Co",
     "status": "正式倉",
-    "price": "163.47",
+    "price": "163.59",
     "buy": "200.00",
     "sell": "",
     "position": "3~4%",
@@ -113,7 +113,7 @@
   "RC": {
     "name": "Ready Capital Corp",
     "status": "正式倉",
-    "price": "0.66",
+    "price": "0.63",
     "buy": "2.00",
     "sell": "",
     "position": "2",
@@ -124,7 +124,7 @@
   "META": {
     "name": "Meta Platforms Inc",
     "status": "正式倉",
-    "price": "593.33",
+    "price": "589.82",
     "buy": "550.00",
     "sell": "",
     "position": "2",
@@ -135,7 +135,7 @@
   "NFLX": {
     "name": "Netflix Inc",
     "status": "正式倉",
-    "price": "59.13",
+    "price": "58.87",
     "buy": "70.00",
     "sell": "",
     "position": "2",
@@ -146,7 +146,7 @@
   "SFM": {
     "name": "Sprouts Farmers Market Inc",
     "status": "正式倉",
-    "price": "51.92",
+    "price": "51.79",
     "buy": "65.00",
     "sell": "90.00",
     "position": "2",
@@ -157,7 +157,7 @@
   "INTC": {
     "name": "Intel Corp",
     "status": "觀察倉",
-    "price": "55.27",
+    "price": "54.80",
     "buy": "50.00",
     "sell": "",
     "position": "2",
@@ -168,7 +168,7 @@
   "WYNN": {
     "name": "Wynn Resorts Ltd",
     "status": "觀察倉",
-    "price": "84.58",
+    "price": "84.11",
     "buy": "80.00",
     "sell": "",
     "position": "0.5",
@@ -179,7 +179,7 @@
   "NVDA": {
     "name": "NVIDIA Corp",
     "status": "觀察倉",
-    "price": "152.90",
+    "price": "155.38",
     "buy": "",
     "sell": "",
     "position": "3",
@@ -190,7 +190,7 @@
   "TSM": {
     "name": "Taiwan Semicndctr Mnufctrng Co Ltd",
     "status": "觀察倉",
-    "price": "347.50",
+    "price": "349.20",
     "buy": "320.00",
     "sell": "",
     "position": "",
@@ -201,7 +201,7 @@
   "MRVL": {
     "name": "Marvell Technology Inc",
     "status": "觀察倉",
-    "price": "132.21",
+    "price": "131.57",
     "buy": "105.00",
     "sell": "",
     "position": "",
@@ -212,7 +212,7 @@
   "AVGO": {
     "name": "Broadcom Inc",
     "status": "觀察倉",
-    "price": "302.63",
+    "price": "301.08",
     "buy": "300.00",
     "sell": "",
     "position": "1",
@@ -223,7 +223,7 @@
   "WMT": {
     "name": "Walmart Inc",
     "status": "正式倉",
-    "price": "132.03",
+    "price": "132.31",
     "buy": "100.00",
     "sell": "",
     "position": "",
@@ -234,7 +234,7 @@
   "MCD": {
     "name": "McDonald's Corp",
     "status": "觀察倉",
-    "price": "280.80",
+    "price": "280.70",
     "buy": "220.00",
     "sell": "",
     "position": "",
@@ -245,7 +245,7 @@
   "PG": {
     "name": "Procter & Gamble Co",
     "status": "觀察倉",
-    "price": "172.58",
+    "price": "172.47",
     "buy": "145.00",
     "sell": "",
     "position": "0.1",
